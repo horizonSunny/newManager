@@ -32,9 +32,24 @@
       </nz-modal>
     </nz-breadcrumb>
     <!-- 列表内容 -->
-    <nz-table #nzTable [nzData]="listOfDisplayData">
+     <nz-table #nzTable 
+        [nzData]="listOfAllData"   
+        (nzCurrentPageDataChange)="currentPageDataChange($event)"
+
+        [nzPageSize] = 'pageSize'
+        [nzFrontPagination]='false'
+        [nzTotal] = 'pageTotal'
+        [nzPageIndex]="pageIndex"
+        (nzPageIndexChange)='pageIndexChange($event)'
+      >
       <thead (nzSortChange)="sort($event)" nzSingleSort>
         <tr>
+          <th
+            nzShowCheckbox
+            [(nzChecked)]="isAllDisplayDataChecked"
+            [nzIndeterminate]="isIndeterminate"
+            (nzCheckedChange)="checkAll($event)"
+          >序号</th>
           <th nzCustomFilter>姓名</th>
           <th      
           nzShowFilter
@@ -52,8 +67,8 @@
           <th>测评报告</th>
           <th   nzShowFilter
           [nzFilterMultiple]="false"
-          [nzFilters]="selectedOptions['eduction']"
-          (nzFilterChange)="filter('eduction', $event)">教育程度</th>
+          [nzFilters]="selectedOptions['education']"
+          (nzFilterChange)="filter('education', $event)">教育程度</th>
           <th>职业</th>
           <th>婚姻</th>
           <th>地址</th>
@@ -65,29 +80,36 @@
           [nzFilterMultiple]="false"
           [nzFilters]="selectedOptions['pharmacy']"
           (nzFilterChange)="filter('pharmacy', $event)">是否用过痴呆药物</th>
-          <th nzShowSort nzSortKey="name">建档时间</th>
+          <th nzShowSort nzSortKey="createTime">建档时间</th>
           <th>建档人</th>
-          <th nzShowSort nzSortKey="name">更新时间</th>
+          <th nzShowSort nzSort="this.orderBy" nzSortKey="updateTime">更新时间</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let data of nzTable.data" (click)="goToDetails(data)">
-          <td>{{ data.patient.patientName }}</td>
-          <td>{{ data.patient.patientSex === 0 ? "女" : "男" }}</td>
-          <td>{{ data.patient.patientAge }}</td>
-          <td>{{ data.patient.mobilephone }}</td>
-          <td>{{ data.patient.presentation }}</td>
-          <td>{{ data.patient.education }}</td>
-          <td>{{ data.patient.jobType }}</td>
-          <td>{{ data.patient.marrige }}</td>
-          <td>{{ data.patient.address }}</td>
-          <td>{{ data.patient.status }}</td>
-          <td>{{ data.medicationNames }}</td>
-          <td>{{ data.patient.createTime }}</td>
-          <td>{{ data.creater }}</td>
-          <td>{{ data.patient.updateTime }}</td>
+        <tr *ngFor="let data of nzTable.data ;let i = index" (click)="goToDetails(data)">
+            <td
+            nzShowCheckbox
+            [(nzChecked)]="mapOfCheckedId[data.id]"
+            (nzCheckedChange)="refreshStatus()"
+            (click)="$event.stopPropagation()"
+          >
+        {{i+1}}</td>
+          <td>{{ data.info.patient.patientName }}</td>
+          <td>{{ data.info.patient.patientSex === 0 ? "男" : "女" }}</td>
+          <td>{{ data.info.patient.patientAge }}</td>
+          <td>{{ data.info.patient.mobilephone }}</td>
+          <td>{{ data.info.patient.presentation }}</td>
+          <td>{{ data.info.patient.education }}</td>
+          <td>{{ data.info.patient.jobType }}</td>
+          <td>{{ data.info.patient.marrige }}</td>
+          <td>{{ data.info.patient.address }}</td>
+          <td>{{ data.info.patient.status }}</td>
+          <td>{{ data.info.medicationNames }}</td>
+          <td>{{ data.info.patient.createTime }}</td>
+          <td>{{ data.info.creater }}</td>
+          <td>{{ data.info.patient.updateTime }}</td>
         </tr>
       </tbody>
-    </nz-table> 
+    </nz-table>  
   </nz-content>
 </nz-layout>

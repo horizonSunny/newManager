@@ -13,24 +13,22 @@ import { HttpClient } from "@angular/common/http";
 })
 export class FileslistComponent implements OnInit {
   // select的选项信息
-  sexSelected: any;
-  ageSelected: any;
-  educationSelected: any;
-  medicalHistorySelected: any;
-  medicationNameSelected: any;
-  patientNameSelected: any;
+  sex: any = -1;
+  age: any = '';
+  education: any = '';
+  definiteCase: any = -1;
+  pharmacy: any = '';
+  patientNameSelected: any = '';
+  sortKey: any = '';
+  orderBy: any = null;
   selectedOptions = {
     sex: [{ text: '男', value: 0 }, { text: '女', value: 1 }, { text: '不限', value: -1 }],
-    
     age: [{ text: '小于60', value: '0-59' }, { text: '60-64', value: '60-64' }, { text: '65-69', value: '65-69' },
     { text: '70-74', value: '70-74' }, { text: '大于74', value: '75-300' }, { text: '不限', value: '' }],
-    
-    eduction: [{ text: '小于7', value: '0-6' }, { text: '7-9', value: '7-9' }, { text: '10-12', value: '10-12' },
+    education: [{ text: '小于7', value: '0-6' }, { text: '7-9', value: '7-9' }, { text: '10-12', value: '10-12' },
     { text: '13-16', value: '13-16' }, { text: '大于16', value: '17-300' }, { text: '不限', value: '' }],
-    
     definiteCase: [{ text: 'MCI', value: 1}, { text: '早期', value: 2 }, { text: '中期', value: 3 },
     { text: '晚期', value: 4 }, { text: '其他', value: 5 }, { text: '否', value: 0 }, { text: '不限', value: -1 }],
-    
     pharmacy: [{ text: '多奈哌齐', value: '多奈哌齐' }, { text: '美金刚', value: '美金刚' }, { text: '卡巴拉汀', value: '卡巴拉汀' },
       { text: '石杉碱甲', value: '石杉碱甲' }, { text: '奥拉西坦', value: '奥拉西坦' },
       { text: '维生素B', value: '维生素B' }, { text: '叶酸', value: '叶酸' },
@@ -39,7 +37,18 @@ export class FileslistComponent implements OnInit {
     ],
 
   };
+  // 选中问题
+  isAllDisplayDataChecked = false;
+  isOperating = false;
+  isIndeterminate = false;
   listOfDisplayData = [];
+  listOfAllData = [];
+  mapOfCheckedId: { [key: string]: boolean } = {};
+  numberOfChecked = 0;
+  // 页面设置
+  pageSize = 5;
+  pageTotal = 0;
+  pageIndex = 1;
   // 导出
   isVisible = false;
 
@@ -73,81 +82,124 @@ export class FileslistComponent implements OnInit {
     this.isVisible = false;
   }
   // 导出excel 文件
-
-  // exportList() {
-  //   let nameList;
-  //   const params = {
-  //     patientIds: [6]
-  //   };
-  //   this.http
-  //     .post(
-  //       "http://138.197.212.45:8081/brainPlatform/rest/backend/exportPatients",
-  //       params,
-  //       {
-  //         headers: { token: localStorage.getItem("token") }
-  //       }
-  //     )
-  //     .subscribe((res: any) => {
-  //       // this.listOfDisplayData = res.body;
-  //       nameList = res;
-  //       console.log("this.listOfDisplayData_", this.listOfDisplayData);
-  //     });
-
-  //   let json = nameList;
-  //   //这个nameList (随便起的名字)，是要导出的json数据
-  //   const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(json);
-  //   const workbook: XLSX.WorkBook = {
-  //     Sheets: { data: worksheet },
-  //     SheetNames: ["data"]
-  //   };
-  //   const excelBuffer: any = XLSX.write(workbook, {
-  //     bookType: "xlsx",
-  //     type: "array"
-  //   });
-  //   //这里类型如果不正确，下载出来的可能是类似xml文件的东西或者是类似二进制的东西等
-  //   this.saveAsExcelFile(excelBuffer, "nameList");
+  // exportModal() {
+  //   console.log(this.doctorList, '导出');
+  //   if (this.doctorList == []) {
+  //     this.isVisible = true;
+  //   } else {
+  //     let nameList;
+  //     const params = {
+  //       doctorIds: [this.checkDoctor]
+  //     };
+  //     console.log(params, '导出--确定');
+  //     this.http.post('http://192.168.5.185:8080/brainPlatform/rest/backend/exportDoctors', params,
+  //       { headers: { token: localStorage.getItem('token') }, responseType: 'blob' }).subscribe((data: any) => {
+  //         console.log(data, '导出数据');
+  //         var blob = new Blob([data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+  //         var objectUrl = URL.createObjectURL(blob);
+  //         window.open(objectUrl);
+  //       });
+  //   }
   // }
-
-  // private saveAsExcelFile(buffer: any, fileName: string) {
-  //   const data: Blob = new Blob([buffer], {
-  //     type:
-  //       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8"
-  //   });
-  //   FileSaver.saveAs(data, fileName + "_" + new Date().getTime() + ".xls");
-  //   // 如果写成.xlsx,可能不能打开下载的文件，这可能与Excel版本有关
-  // }
+  // 过滤选项数据，赋值this
   filter(listOfSearchName: string, searchAddress: string) {
-    // this.listOfSearchName = listOfSearchName;
+    this[listOfSearchName] = searchAddress;
     // this.searchAddress = searchAddress;
     // this.search();
-    console.log('name_', listOfSearchName);
-    console.log('listOfSearchName_', searchAddress);
+    this.getData();
+    console.log('this[listOfSearchName]_', this[listOfSearchName]);
+
+  }
+  // 选中的函数
+  currentPageDataChange($event): void {
+    this.listOfDisplayData = $event;
+    this.refreshStatus();
+  }
+  refreshStatus(): void {
+    this.isAllDisplayDataChecked = this.listOfDisplayData
+      .every(item => this.mapOfCheckedId[item.id]);
+    this.isIndeterminate =
+      this.listOfDisplayData.some(item => this.mapOfCheckedId[item.id]) &&
+      !this.isAllDisplayDataChecked;
+    this.numberOfChecked = this.listOfAllData.filter(item => this.mapOfCheckedId[item.id]).length;
+    console.log('this.mapOfCheckedId_', this.mapOfCheckedId);
+  }
+
+  checkAll(value: boolean): void {
+    this.listOfDisplayData.forEach(item => (this.mapOfCheckedId[item.id] = value));
+    this.refreshStatus();
+  }
+
+  operateData(): void {
+    this.isOperating = true;
+    setTimeout(() => {
+      this.listOfAllData.forEach(item => (this.mapOfCheckedId[item.id] = false));
+      this.refreshStatus();
+      this.isOperating = false;
+    }, 1000);
+  }
+  stopPropagation($event: Event) {
+    $event.stopPropagation();
+  }
+// 排序
+sort(event) {
+  this.sortKey = event.key;
+  switch (event.value) {
+    case null:
+      this.orderBy = '';
+      break;
+    case 'descend':
+      this.orderBy  = 'DESC';
+      break;
+    case 'ascend':
+      this.orderBy  = 'ASC';
+      break;
+  }
+  this.getData();
+}
+pageIndexChange(event) {
+  console.log('pageIndexChange_', event);
+  console.log('pageIndexChange_page_', this.pageIndex);
+  this.pageIndex = event;
+  this.getData();
+}
+// 发送http请求
+getData() {
+    const params = {
+      educationTime: this.education,
+      medicalHistory: this.definiteCase,
+      medicationName: this.pharmacy,
+      orderBy: this.orderBy,
+      pageNumber: this.pageIndex - 1,
+      pageSize: this.pageSize,
+      patientAge: this.age,
+      patientName: '',
+      patientSex: this.sex,
+      sortKey: this.sortKey
+    };
+    this.http
+    .post(
+      "http://192.168.5.185:8081/rest/backend/patients",
+      params,
+      {
+        headers: { Token: localStorage.getItem("token") }
+      }
+    )
+    .subscribe((res: any) => {
+      this.pageIndex = res.body.pageNumber + 1;
+      this.pageTotal = res.body.totalElements;
+      console.log('pageTotal_', this.pageTotal);
+      const list = [];
+      for (let i = 0; i < res.body.patients.length; i++) {
+        list.push({id: i, info: res.body.patients[i]});
+      }
+      this.listOfAllData = list;
+      console.log('this.listOfAllData_', this.listOfAllData);
+      // this.listOfDisplayData = res.body;
+      // console.log("this.listOfDisplayData_", this.listOfDisplayData);
+    });
   }
   ngOnInit(): void {
-    const params = {
-      educationTime: "",
-      medicalHistory: -1,
-      medicationName: "",
-      orderBy: "",
-      pageNumber: 0,
-      pageSize: 10,
-      patientAge: "",
-      patientName: "",
-      patientSex: -1,
-      sortKey: ""
-    };
-
-    this.http
-      .post(
-        "http://192.168.5.185:8080/brainPlatform/rest/backend/patients",
-        params,
-        {
-          headers: { Token: localStorage.getItem("token") }
-        }
-      )
-      .subscribe((res: any) => {
-        this.listOfDisplayData = res.body;
-        console.log("this.listOfDisplayData_", this.listOfDisplayData);
-      });
+    this.getData();
   }
 }
