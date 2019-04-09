@@ -126,6 +126,7 @@ export class FileslistComponent implements OnInit {
       !this.isAllDisplayDataChecked;
     this.numberOfChecked = this.listOfAllData.filter(item => this.mapOfCheckedId[item.id]).length;
     console.log('this.mapOfCheckedId_', this.mapOfCheckedId);
+    console.log('his.listOfDisplayData_', this.listOfDisplayData);
   }
 
   checkAll(value: boolean): void {
@@ -201,6 +202,29 @@ getData() {
       // this.listOfDisplayData = res.body;
       // console.log("this.listOfDisplayData_", this.listOfDisplayData);
     });
+  }
+
+  // 导出
+  exportModal() {
+    let {keys, values, entries} = Object;
+    let exportArr = [];
+    for (let i = 0; i < values.length; i++) {
+      if (values[i] === false) {
+        continue;
+      } else {
+        const id = this.listOfDisplayData[i].info.patient.uid;
+        exportArr.push(id);
+      }
+    }
+    console.log('exportArr_', exportArr);
+    // id未确定，明天解决
+    this.http.post('http://192.168.5.185:8081/rest/backend/exportDoctors', params,
+        { headers: { token: localStorage.getItem('token') }, responseType: 'blob' }).subscribe((data: any) => {
+          console.log(data, '导出数据');
+          var blob = new Blob([data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+          var objectUrl = URL.createObjectURL(blob);
+          window.open(objectUrl);
+        });
   }
   ngOnInit(): void {
     this.getData();
