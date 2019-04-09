@@ -55,13 +55,11 @@ export class FileslistComponent implements OnInit {
   constructor(private router: Router, private http: HttpClient) {}
   // 用户基本信息点击
   goToDetails(info) {
-    console.log("---------");
 
     console.log("user_detail_", info);
     const detailInfo = JSON.stringify(info);
     this.router.navigate(["/presentation"], {
-      queryParams: { patientInfo: detailInfo },
-      skipLocationChange: true
+      queryParams: { patientInfo: detailInfo }
     });
 
     // this.router.navigate(["/presentation"], {

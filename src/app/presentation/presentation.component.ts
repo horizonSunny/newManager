@@ -16,7 +16,10 @@ export class PresentationComponent implements OnInit {
   tabs: any[] = [];
   nzTabPosition = "top";
   selectedIndex = 0;
-  test = "是";
+  sex: any;
+  cerebralTrauma: any;
+  familialDisease: any;
+  medicineArr: [];
   // 查看详情模态框
   isVisible = false;
 
@@ -60,7 +63,10 @@ export class PresentationComponent implements OnInit {
       this.routeInfo.snapshot.queryParams["patientInfo"]
     );
     console.log("detailsInfo_", this.detailsInfo);
-
+    this.sex = this.detailsInfo['patient']['patientSex'] +'';
+    this.cerebralTrauma = this.detailsInfo['medicalHistoryType'][1]['medicalHistoryDegree'] +'';
+    this.familialDisease = this.detailsInfo['medicalHistoryType'][2]['medicalHistoryDegree'] +'';
+    this.medicineArr = this.detailsInfo['medicalHistoryType'][0]['medications'];
     for (let i = 0; i < 20; i++) {
       this.tabs.push({
         name: ` 02/25 12:2${i}`,

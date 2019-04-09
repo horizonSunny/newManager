@@ -38,10 +38,11 @@
         <div class="userSex">
           <span class="explain">*性别:&nbsp;</span>
           <nz-radio-group
-            [(ngModel)]="this.detailsInfo['patient']['patientSex']"
+            [(ngModel)]="sex"
+            [disabled]="true"
           >
-            <label nz-radio nzValue="0">男</label>
-            <label nz-radio nzValue="1">女</label>
+            <label nz-radio nzValue='0'>男</label>
+            <label nz-radio nzValue='1'>女</label>
           </nz-radio-group>
         </div>
         <div class="userAge">
@@ -50,6 +51,7 @@
             class="explainText"
             placeholder="出生年龄"
             [(ngModel)]="this.detailsInfo['patient']['patientBirthdate']"
+            [disabled]="true"
           />
         </div>
         <div class="userMarriage">
@@ -58,6 +60,7 @@
             class="explainText"
             placeholder="婚姻状况"
             [(ngModel)]="this.detailsInfo['patient']['marrige']"
+            [disabled]="true"
           />
         </div>
         <div class="userPhone">
@@ -66,6 +69,7 @@
             class="explainText"
             placeholder="用户手机号"
             [(ngModel)]="this.detailsInfo['patient']['mobilephone']"
+            [disabled]="true"
           />
         </div>
         <div class="userManage">
@@ -74,6 +78,7 @@
             class="explainText"
             placeholder="职业"
             [(ngModel)]="this.detailsInfo['patient']['jobType']"
+            [disabled]="true"
           />
         </div>
         <div class="userSchool">
@@ -82,19 +87,17 @@
             class="explainText"
             placeholder="受教育程度"
             [(ngModel)]="this.detailsInfo['patient']['education']"
+            [disabled]="true"
           />
         </div>
         <div class="userYears">
           <span class="explain">*共：</span>
-          <nz-select
-            style="width: 120px;"
-            [(ngModel)]="yearsValue"
-            nzAllowClear
-            nzPlaceHolder="1"
-          >
-            <nz-option nzValue="one" nzLabel="1"></nz-option>
-            <nz-option nzValue="two" nzLabel="2"></nz-option>
-          </nz-select>
+          <input
+          class="explainText"
+          placeholder="受教育程度"
+          [(ngModel)]="this.detailsInfo['patient']['educationTime']"
+          [disabled]="true"
+        />
         </div>
         <div class="userAddress">
           <span class="explain">*居住地：</span>
@@ -102,6 +105,7 @@
             class="explainText"
             placeholder="居住地"
             [(ngModel)]="this.detailsInfo['patient']['address']"
+            [disabled]="true"
           />
         </div>
         <div class="userId">
@@ -110,6 +114,7 @@
             class="explainText"
             placeholder="用户身份证号"
             [(ngModel)]="this.detailsInfo['patient']['patientIdnumber']"
+            [disabled]="true"
           />
         </div>
       </div>
@@ -117,59 +122,63 @@
       <div class="drugUser">
         <div class="drugNo">
           <span class="explain">*是否用过痴呆药物：</span>
-          <nz-radio-group [(ngModel)]="this.test">
-            <label nz-radio nzValue="是">是</label>
-            <label nz-radio nzValue="否">否</label>
-          </nz-radio-group>
         </div>
-        <div class="drugTime">
-          <span class="explain">*用药时间：</span>
-          <input
-            class="explainText"
-            placeholder="起始时间"
-            [(ngModel)]="startTime"
-          />
-          <span> 至 </span>
-          <input
-            class="explainText"
-            placeholder="结束时间"
-            [(ngModel)]="endTime"
-          />
-        </div>
-        <div class="drugStop">
-          <span class="explain">*是否停药:&nbsp;</span>
-          <nz-radio-group [(ngModel)]="stopYaoValue">
-            <label nz-radio nzValue="yesYao">是</label>
-            <label nz-radio nzValue="noYao">否</label>
-          </nz-radio-group>
-        </div>
-        <div class="drugReason">
-          <span class="explain">*停药原因:</span>
-          <nz-select
-            style="width: 120px;"
-            [(ngModel)]="stopValue"
-            nzAllowClear
-            nzPlaceHolder="全部"
-          >
-            <nz-option nzValue="nooBvious" nzLabel="效果不明显"></nz-option>
-            <nz-option nzValue="other" nzLabel="使用其他药物"></nz-option>
-          </nz-select>
+        <div style="height: auto;width: auto" *ngFor='let item of medicineArr'>
+              <div class="drugTime">
+                <i nz-icon nzType="check-circle" nzTheme="fill" style="color:blue" *ngIf="item.medicationDegree===1"></i>
+                <i nz-icon nzType="check-circle" nzTheme="fill" style="color:white" *ngIf="item.medicationDegree===0"></i>
+                <span>{{item['medicationName']}}</span>
+              </div>
+              <div style="height: auto;width: auto" *ngIf="item.medicationDegree===1">
+                  <div class="drugTime">
+                      <span class="explain">*用药时间：</span>
+                      <input
+                        class="explainText"
+                        placeholder="起始时间"
+                        [(ngModel)]="item.medicationStartTime"
+                        [disabled]="true"
+                      />
+                      <span> 至 </span>
+                      <input
+                        class="explainText"
+                        placeholder="结束时间"
+                        [(ngModel)]="item.medicationEndTime"
+                        [disabled]="true"
+                      />
+                    </div>
+                    <div class="drugStop">
+                      <span class="explain">*是否停药:&nbsp;</span>
+                      <nz-radio-group [(ngModel)]="item" [disabled]="true">
+                        <label nz-radio nzValue="yesYao">是</label>
+                        <label nz-radio nzValue="noYao">否</label>
+                      </nz-radio-group>
+                    </div>
+                    <div class="drugReason">
+                      <span class="explain">*停药原因:</span>
+                      <input
+                      class="explainText"
+                      placeholder="停药原因"
+                      [(ngModel)]="item.reason"
+                      [disabled]="true"
+                    />
+                    </div>
+              </div>
         </div>
       </div>
       <!-- 调查 -->
       <div class="userWhether">
         <div class="injuryBrain">
           <span class="explain">*是否有脑外伤:&nbsp;</span>
-          <nz-radio-group [(ngModel)]="NoYesValue">
-            <label nz-radio nzValue="yes">是</label>
-            <label nz-radio nzValue="no">否</label>
+          <nz-radio-group [(ngModel)]="cerebralTrauma" [disabled]="true">
+            <label nz-radio nzValue="1">是</label>
+            <label nz-radio nzValue="0">否</label>
           </nz-radio-group>
         </div>
         <div class="dementia">
           <span class="explain">*是否有老年痴呆家族史:&nbsp;</span>
-          <nz-radio-group [(ngModel)]="familyValue">
-            <label nz-radio nzValue="familyYes">是</label>
-            <label nz-radio nzValue="familyNo">否</label>
+          <nz-radio-group [(ngModel)]="familialDisease" [disabled]="true">
+            <label nz-radio nzValue="1">是</label>
+            <label nz-radio nzValue="0">否</label>
           </nz-radio-group>
         </div>
       </div>

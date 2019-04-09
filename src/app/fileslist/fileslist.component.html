@@ -82,11 +82,11 @@
           (nzFilterChange)="filter('pharmacy', $event)">是否用过痴呆药物</th>
           <th nzShowSort nzSortKey="createTime">建档时间</th>
           <th>建档人</th>
-          <th nzShowSort nzSort="this.orderBy" nzSortKey="updateTime">更新时间</th>
+          <th nzShowSort nzSortKey="updateTime">更新时间</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let data of nzTable.data ;let i = index" (click)="goToDetails(data)">
+        <tr *ngFor="let data of nzTable.data ;let i = index" (click)="goToDetails(data['info'])">
             <td
             nzShowCheckbox
             [(nzChecked)]="mapOfCheckedId[data.id]"
