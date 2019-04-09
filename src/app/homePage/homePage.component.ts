@@ -82,11 +82,10 @@ export class HomePageComponent implements OnInit {
       // console.log(this.tokenRequest, '登录数据')
       this.http.post('http://192.168.5.185:8080/brainPlatform/rest/user/login', this.tokenRequest,{ observe: "response",
       responseType: "json"}).subscribe((data: any) => {
-        // console.log(data.headers.get('Token'), '登陆返回数据');  
+        // console.log(data.headers.get('Token'), '登陆返回数据');
         const token = data.headers.get('Token');
         localStorage.setItem('token', token);
         // console.log(data,'6666');
-        
         if (data.body.status === '1') {
           this.router.navigate(['/fileslist']);
         }

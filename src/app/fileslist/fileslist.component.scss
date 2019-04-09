@@ -1,42 +1,56 @@
-*{
-    margin:0;
-    padding:0;
+* {
+    margin: 0;
+    padding: 0;
 }
-.layout{
+
+.layout {
+    .example-input {
+        display: inline-block;
+    }
+
+    .example-input .ant-input {
+        width: 200px;
+        margin: 0 8px 8px 0;
+    }
+
     // 档案内容列表
-    .nzContent{
+    .nzContent {
+
         // 导航搜索
-        .nzContentTitle{
+        .nzContentTitle {
+
             //批量导入
-           .nzButton {
+            .nzButton {
                 width: 102px;
                 height: 30px;
                 float: right;
                 // margin-top:10px;
-                margin-bottom:10px;
-          }
+                margin-bottom: 10px;
+            }
         }
+
         .search-box {
             padding: 8px;
-          }
-    
-          .search-box input {
+        }
+
+        .search-box input {
             width: 188px;
             margin-bottom: 8px;
             display: block;
-          }
-    
-          .search-box button {
+        }
+
+        .search-box button {
             width: 90px;
-          }
-    
-          .search-button {
+        }
+
+        .search-button {
             margin-right: 8px;
-          }
+        }
     }
 }
+
 // 省略号--鼠标划过全部展示
-::ng-deep .ant-select-dropdown-menu-item:hover{
+::ng-deep .ant-select-dropdown-menu-item:hover {
     width: 225px;
     font-size: 12px;
     border: 0px solid #ddd;
@@ -44,7 +58,7 @@
     text-align: left;
     text-overflow: ellipsis;
     white-space: nowrap;
-    color:blue;
-    text-decoration:underline;
-    cursor:pointer; 
+    color: blue;
+    text-decoration: underline;
+    cursor: pointer;
 }

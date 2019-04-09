@@ -2,15 +2,32 @@
   <!-- 档案列表顶部 -->
   <app-backsheader></app-backsheader>
   <!-- 档案内容列表 -->
-  <nz-content class='nzContent' style="padding:0 50px;">
-    <nz-breadcrumb class='nzContentTitle' style="margin:16px 0;">
+  <nz-content class="nzContent" style="padding:15px 50px;">
+    <div class="example-input">
+      <input
+        nz-input
+        placeholder="姓名筛选"
+        nzSize="default"
+        [(ngModel)]="patientNameSelected"
+      />
+    </div>
+    <nz-breadcrumb
+      class="nzContentTitle"
+    >
       <!-- 请输入患者姓名搜索 -->
-      <!-- <nz-input-group class='searchList' nzSearch nzSize="large" [nzAddOnAfter]="suffixButton">
-        <input class='searchText' type="text" nz-input placeholder="请输入姓名搜索">
-      </nz-input-group> -->
-      <!-- 导出 -->
-      <button class='nzButton' nz-button [nzType]="'primary'" (click)="showModal()"><span>导出</span></button>
-      <nz-modal [(nzVisible)]="isVisible" (nzOnCancel)="handleCancel()" (nzOnOk)="handleOk()">
+      <button
+        class="nzButton"
+        nz-button
+        [nzType]="'primary'"
+        (click)="exportList()"
+      >
+        <span>导出</span>
+      </button>
+      <nz-modal
+        [(nzVisible)]="isVisible"
+        (nzOnCancel)="handleCancel()"
+        (nzOnOk)="handleOk()"
+      >
         <p>请选中需要导出的患者!</p>
       </nz-modal>
     </nz-breadcrumb>
@@ -18,53 +35,59 @@
     <nz-table #nzTable [nzData]="listOfDisplayData">
       <thead (nzSortChange)="sort($event)" nzSingleSort>
         <tr>
-          <th nzCustomFilter>
-            姓名
-            <nz-dropdown nzTrigger="click" nzPlacement="bottomRight" [nzClickHide]="false" nzTableFilter #dropdown>
-              <i nz-icon nzType="search" class="ant-table-filter-icon"
-                [class.ant-table-filter-open]="dropdown.nzVisible" nz-dropdown></i>
-              <div class="search-box">
-                <input type="text" nz-input placeholder="Search name" [(ngModel)]="searchValue" />
-                <button nz-button nzSize="small" nzType="primary" (click)="search()" class="search-button">
-                  搜索
-                </button>
-                <button nz-button nzSize="small" (click)="reset()">Reset</button>
-              </div>
-            </nz-dropdown>
-          </th>
-          <th nzShowFilter [nzFilters]="listOfFilterSex" (nzFilterChange)="filterSexChange($event)">性别</th>
-          <th>年龄</th>
+          <th nzCustomFilter>姓名</th>
+          <th      
+          nzShowFilter
+          [nzFilterMultiple]="false"
+          [nzFilters]="selectedOptions['sex']"
+          (nzFilterChange)="filter('sex', $event)"
+          >性别</th>
+          <th 
+          nzShowFilter
+          [nzFilterMultiple]="false"
+          [nzFilters]="selectedOptions['age']"
+          (nzFilterChange)="filter('age', $event)"
+          >年龄</th>
           <th>手机号</th>
           <th>测评报告</th>
-          <th nzShowFilter [nzFilters]="listOfFilterEducation" (nzFilterChange)="filterEducationChange($event)">教育程度</th>
+          <th   nzShowFilter
+          [nzFilterMultiple]="false"
+          [nzFilters]="selectedOptions['eduction']"
+          (nzFilterChange)="filter('eduction', $event)">教育程度</th>
           <th>职业</th>
           <th>婚姻</th>
-          <th nzShowFilter [nzFilters]="listOfFilterAddress" (nzFilterChange)="filterAddressChange($event)">地址</th>
-          <th>是否确诊老年痴呆</th>
-          <th nzShowFilter [nzFilters]="listOfFilterMedicine" (nzFilterChange)="filterMedicineChange($event)">是否用过痴呆药物</th>
-          <th  nzShowSort nzSortKey="name">建档时间</th>
+          <th>地址</th>
+          <th  nzShowFilter
+          [nzFilterMultiple]="false"
+          [nzFilters]="selectedOptions['definiteCase']"
+          (nzFilterChange)="filter('definiteCase', $event)">是否确诊老年痴呆</th>
+          <th  nzShowFilter
+          [nzFilterMultiple]="false"
+          [nzFilters]="selectedOptions['pharmacy']"
+          (nzFilterChange)="filter('pharmacy', $event)">是否用过痴呆药物</th>
+          <th nzShowSort nzSortKey="name">建档时间</th>
           <th>建档人</th>
-          <th  nzShowSort nzSortKey="name">更新时间</th>
+          <th nzShowSort nzSortKey="name">更新时间</th>
         </tr>
       </thead>
       <tbody>
-        <tr (click) = 'searchDetile()' *ngFor="let data of nzTable.data">
-          <td>{{ data.name }}</td>
-          <td>{{ data.sex }}</td>
-          <td>{{ data.age }}</td>
-          <td>{{ data.phone }}</td>
-          <td>{{data.presentation}}</td>
-          <td>{{data.education}}</td>
-          <td>{{data.occupation}}</td>
-          <td>{{data.marriage}}</td>
-          <td>{{ data.address }}</td>
-          <td>{{data.senile}}</td>
-          <td>{{data.medicine}}</td>
-          <td>{{data.recordTime}}</td>
-          <td>{{data.recordUsers}}</td>
-          <td>{{data.updateTime}}</td>
+        <tr *ngFor="let data of nzTable.data" (click)="goToDetails(data)">
+          <td>{{ data.patient.patientName }}</td>
+          <td>{{ data.patient.patientSex === 0 ? "女" : "男" }}</td>
+          <td>{{ data.patient.patientAge }}</td>
+          <td>{{ data.patient.mobilephone }}</td>
+          <td>{{ data.patient.presentation }}</td>
+          <td>{{ data.patient.education }}</td>
+          <td>{{ data.patient.jobType }}</td>
+          <td>{{ data.patient.marrige }}</td>
+          <td>{{ data.patient.address }}</td>
+          <td>{{ data.patient.status }}</td>
+          <td>{{ data.medicationNames }}</td>
+          <td>{{ data.patient.createTime }}</td>
+          <td>{{ data.creater }}</td>
+          <td>{{ data.patient.updateTime }}</td>
         </tr>
       </tbody>
-    </nz-table>
+    </nz-table> 
   </nz-content>
 </nz-layout>

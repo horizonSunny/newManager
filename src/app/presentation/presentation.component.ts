@@ -1,73 +1,38 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit } from "@angular/core";
+import { ActivatedRoute, Router } from "@angular/router";
 
 @Component({
-  selector: 'app-presentation',
-  templateUrl: './presentation.component.html',
-  styleUrls: ['./presentation.component.scss']
+  selector: "app-presentation",
+  templateUrl: "./presentation.component.html",
+  styleUrls: ["./presentation.component.scss"]
 })
 export class PresentationComponent implements OnInit {
+  detailsInfo: any;
 
-  // 用户姓名
-  nameValue: string;
-  // 性别选择
-  sexValue = 'A';
-  // 年龄
-  ageValue:string;
-  // 婚姻状况
-  marriageValue = 'allMarried';
-  // 手机号
-  phoneValue : string;
-  // 职业
-  Occupation = 'allOccd';
-  // 教育程度
-  educationValue = 'primary';
-  // 年数
-  yearsValue = 'one';
-  // 居住地
-  residenceValue = 'city';
-  // 身份证号
-  idValue:string;
-  // 用过的药物
-  drugRadio = true;
-  // 开始时间
-  startTime:string;
-  // 结束时间
-  endTime:string;
-  // 停药原因
-  stopValue='nooBvious';
-  // 是否有脑外伤
-  NoYesValue = 'yes';
-  // 是否有家族史
-  familyValue = 'familyYes';
-  // 是否停药
-  stopYaoValue = 'yesYao';
-  // 用户信息详情
-
-  hideDetile:boolean = true;
-  hideevaluation:boolean = false;
+  hideDetile: boolean = true;
+  hideevaluation: boolean = false;
 
   // 顶部时间横轴设置
   tabs: any[] = [];
-  nzTabPosition = 'top';
+  nzTabPosition = "top";
   selectedIndex = 0;
-
+  test = "是";
   // 查看详情模态框
   isVisible = false;
 
-
-  constructor() { }
+  constructor(private routeInfo: ActivatedRoute) {}
 
   // 基本信息点击
-  basicData(){
-    console.log('1111');
-    this.hideDetile=true;
-    this.hideevaluation=false;
+  basicData() {
+    console.log("1111");
+    this.hideDetile = true;
+    this.hideevaluation = false;
   }
   // 测评报告点击
-  presentText(){
-    console.log('1111');
-    this.hideevaluation=true;
-    this.hideDetile=false;
+  presentText() {
+    console.log("1111");
+    this.hideevaluation = true;
+    this.hideDetile = false;
   }
 
   log(args: any[]): void {
@@ -79,23 +44,28 @@ export class PresentationComponent implements OnInit {
   }
 
   handleOk(): void {
-    console.log('Button ok clicked!');
+    console.log("Button ok clicked!");
     this.isVisible = false;
   }
 
   handleCancel(): void {
-    console.log('Button cancel clicked!');
+    console.log("Button cancel clicked!");
     this.isVisible = false;
   }
 
+  ngOnInit(): void {
+    // this.detailsInfo = this.routeInfo.snapshot.queryParams["id"];
+    // console.log("this.detailsInfo_", this.detailsInfo);
+    this.detailsInfo = JSON.parse(
+      this.routeInfo.snapshot.queryParams["patientInfo"]
+    );
+    console.log("detailsInfo_", this.detailsInfo);
 
-  ngOnInit(): void  {
     for (let i = 0; i < 20; i++) {
       this.tabs.push({
-        name   : ` 02/25 12:2${i}`,
+        name: ` 02/25 12:2${i}`,
         content: `2019 ${i}`
       });
     }
   }
-
 }
