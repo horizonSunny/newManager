@@ -79,6 +79,11 @@ export class FileslistComponent implements OnInit {
     console.log("Button cancel clicked!");
     this.isVisible = false;
   }
+  keyUpEnter(event) {
+    if (event.which === 13) {
+     this.getData();
+    }
+  }
   // 导出excel 文件
   // exportModal() {
   //   console.log(this.doctorList, '导出');
@@ -171,7 +176,7 @@ getData() {
       pageNumber: this.pageIndex - 1,
       pageSize: this.pageSize,
       patientAge: this.age,
-      patientName: '',
+      patientName: this.patientNameSelected,
       patientSex: this.sex,
       sortKey: this.sortKey
     };

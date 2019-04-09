@@ -9,6 +9,7 @@
         placeholder="姓名筛选"
         nzSize="default"
         [(ngModel)]="patientNameSelected"
+        (keyup)="keyUpEnter($event)"
       />
     </div>
     <nz-breadcrumb
