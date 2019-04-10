@@ -205,20 +205,27 @@ getData() {
   }
 
   // 导出
-  exportModal() {
-    let {keys, values, entries} = Object;
-    let exportArr = [];
-    for (let i = 0; i < values.length; i++) {
-      if (values[i] === false) {
-        continue;
-      } else {
-        const id = this.listOfDisplayData[i].info.patient.uid;
-        exportArr.push(id);
+  exportList() {
+    let values = Object.entries(this.mapOfCheckedId);
+    let selectedIndex = [];
+    for (let i = 0 ; i < values.length; i++) {
+      if(values[i][1] = true){
+        selectedIndex.push(values[i][0]);
       }
     }
-    console.log('exportArr_', exportArr);
+    let patientIds = [];
+    for (let i = 0; i < selectedIndex.length; i++) {
+      const index = selectedIndex[i];
+      const id = this.listOfDisplayData[index].info.patient.uid;
+      patientIds.push(id);
+    }
+    console.log('patientIds_', patientIds);
+    if (patientIds.length === 0) {
+      this.isVisible = true;
+      return;
+    }
     // id未确定，明天解决
-    this.http.post('http://192.168.5.185:8081/rest/backend/exportDoctors', params,
+    this.http.post('http://192.168.5.185:8081/rest/backend/exportDoctors', {patientIds},
         { headers: { token: localStorage.getItem('token') }, responseType: 'blob' }).subscribe((data: any) => {
           console.log(data, '导出数据');
           var blob = new Blob([data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
