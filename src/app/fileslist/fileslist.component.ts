@@ -20,7 +20,7 @@ export class FileslistComponent implements OnInit {
   pharmacy: any = '';
   patientNameSelected: any = '';
   sortKey: any = '';
-  orderBy: any = null;
+  orderBy: any = '';
   selectedOptions = {
     sex: [{ text: '男', value: 0 }, { text: '女', value: 1 }, { text: '不限', value: -1 }],
     age: [{ text: '小于60', value: '0-59' }, { text: '60-64', value: '60-64' }, { text: '65-69', value: '65-69' },
@@ -181,9 +181,10 @@ getData() {
       patientSex: this.sex,
       sortKey: this.sortKey
     };
+    console.log(params,'params');
     this.http
     .post(
-      "http://192.168.5.185:8081/rest/backend/patients",
+      "http://192.168.5.185:8080/brainPlatform/rest/backend/patients",
       params,
       {
         headers: { Token: localStorage.getItem("token") }

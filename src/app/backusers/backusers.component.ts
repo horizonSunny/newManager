@@ -67,6 +67,18 @@ export class BackusersComponent implements OnInit {
   // 上传文件
   filename:any;
   display:boolean;
+  // 姓名
+  patientName: any;
+
+  // 分页设置
+  pageSize = 5;
+  // 数据总数
+  pageTotal = 0;
+  // 当前页数
+  pageIndex = 1;
+  // 排序
+  sortKey: any = '';
+  orderBy: any = '';
 
   token:string = localStorage.getItem('token')
   constructor(
@@ -80,46 +92,12 @@ export class BackusersComponent implements OnInit {
   listOfFilterAddress = [{ text: '全部', value: '-1' }, { text: '账户已删除', value: '0' }, { text: '正常状态', value: '1' }, { text: '禁用状态', value: '2' }];
   // 性别
   listOfFilterSex = [{ text: '女', value: '1' }, { text: '男', value: '0' }, { text: '全部', value: '-1' }];
-  // 教育程度
-  // listOfFilterEducation = [{ text: '乌鲁木齐阿波罗医院', value: '乌鲁木齐阿波罗医院' }, { text: '仁济医院', value: '仁济医院' }, { text: '浦东妇幼', value: '浦东妇幼' }];
   listOfSearchAddress: string[] = [];
   listOfSearchSex: string[] = [];
   listOfSearchEducation: string[] = [];
   listOfSearchMedicine: string[] = [];
   listOfData: Array<{ filter: string }> = [this.healthyDivision];
   listOfDisplayData = [...this.listOfData];
-  // reset(): void {
-  //   this.searchValue = '';
-  //   this.search();
-  // }
-  // 排序事件
-  // sort(sort: { key: string; value: string }): void {
-  //   this.sortName = sort.key;
-  //   this.sortValue = sort.value;
-  //   this.search();
-  // }
-  // // 详情地址
-  // filterAddressChange(value: string): void {
-  //   console.log('filterAddressChange_',value);
-  //   // this.listOfSearchAddress = value;
-  //   // console.log(this.listOfSearchAddress, 'sddfdf');
-
-  //   this.search();
-  // }
-  // 性别
-  // filterSexChange(value: string[]): void {
-  //   this.listOfSearchSex = value;
-  //   console.log(this.listOfSearchSex, '2222');
-
-  //   this.search();
-  // }
-  // // 教育程度
-  // filterEducationChange(value: string[]): void {
-  //   this.listOfSearchEducation = value;
-  //   console.log(this.listOfSearchEducation, '2222');
-
-  //   this.search();
-  // }
   // select筛选
   selectFilter(selectName, selectValue: string) {
     console.log('selectName_', selectName, '_selectValue_', selectValue);
@@ -129,31 +107,38 @@ export class BackusersComponent implements OnInit {
     this.getdoctorList();
   }
 
-  // search(): void {
-  //   const filterFunc = (item: { filter:string }) => {
-  // return (
-  //   (this.listOfSearchAddress.length
-  //     ? this.listOfSearchAddress.some(address => item.address.indexOf(address) !== -1)
-  //     : true) && item.userName.indexOf(this.searchValue) !== -1 &&
-  //   (this.listOfSearchSex.length
-  //     ? this.listOfSearchSex.some(sex => item.sex.indexOf(sex) !== -1)
-  //     : true) && item.userName.indexOf(this.searchValue) !== -1 &&
-  //   (this.listOfSearchEducation.length
-  //     ? this.listOfSearchEducation.some(hospitals => item.hospitals.indexOf(hospitals) !== -1)
-  //     : true) && item.userName.indexOf(this.searchValue) !== -1
-  // );
-  // };
-  // const data = this.listOfData.filter((item: { filter:string }) => filterFunc(item));
-  // this.listOfDisplayData = data.sort((a, b) =>
-  //   this.sortValue === 'ascend'
-  //     ? a[this.sortName!] > b[this.sortName!]
-  //       ? 1
-  //       : -1
-  //     : b[this.sortName!] > a[this.sortName!]
-  //       ? 1
-  //       : -1
-  // );
-  // }
+  // 分页设置
+  pageIndexChange(event) {
+    console.log('pageIndexChange_', event);
+    console.log('pageIndexChange_page_', this.pageIndex);
+    this.pageIndex = event;
+    this.getdoctorList();
+  }
+  // 姓名搜索
+  keyUpEnter(event) {
+    console.log(event,'姓名搜索');
+    if (event.which === 13) {
+     this.getdoctorList();
+    }
+  }
+  // 排序
+  // 排序
+sort(event) {
+  this.sortKey = event.key;
+  console.log(this.sortKey,'this.sortKey');
+  switch (event.value) {
+    case null:
+      this.orderBy = '';
+      break;
+    case 'descend':
+      this.orderBy  = 'DESC';
+      break;
+    case 'ascend':
+      this.orderBy  = 'ASC';
+      break;
+  }
+  this.getdoctorList();
+}
 
   // 测评列表
   healthyUser() {
@@ -202,9 +187,8 @@ selectedFileOnChanged() {
       console.log(status,'headers');
       // 上传文件成功   
       if (status === 200) {
+        // 上传服务器成功
           alert('上传文件成功');
-          // 上传文件后获取服务器返回的数据 
-          // const tempRes = JSON.parse(response);
       }else {            
           // 上传文件后获取服务器返回的数据错误
           alert('上传错误')        
@@ -230,14 +214,6 @@ selectedFileOnChanged() {
           var blob = new Blob([data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
           var objectUrl = URL.createObjectURL(blob);
           window.open(objectUrl);
-          // var objectUrl = URL.createObjectURL(blob);  
-          // var a = document.createElement('a');
-          // document.body.appendChild(a);
-          // a.setAttribute('style', 'display:none');
-          // a.setAttribute('href', objectUrl);
-          // a.setAttribute('download', fileName);
-          // a.click();
-          // URL.revokeObjectURL(objectUrl);
         });
     }
   }
@@ -337,20 +313,36 @@ selectedFileOnChanged() {
   // 禁用
   prohibit(uid){
     console.log(uid, '禁用');
-    const url ='http://192.168.5.185:8080/brainPlatform/rest/backend/resetPassword?uid='+uid+'&';
+    const url ='http://192.168.5.185:8080/brainPlatform/rest/backend/resetPassword?uid='+uid+'&operation='+2;
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        'token':  localStorage.getItem('token') 
+      })
+    };
+    console.log(httpOptions,'httpOptions');
+    this.http.post(url,{},httpOptions).subscribe((data: any) => {
+      console.log(data, '禁用');
+      alert('禁用成功');
+    });
+  }
+  // 同步数据
+  synchronization(uid){
+    console.log(uid, '同步数据');
   }
   // 获取医生用户列表
   getdoctorList() {
     const condition = {
       'doctorSex': this.sex,
       'doctorStatus': this.status,
-      'fullname': '',
+      'fullname': this.patientName,
       'hospitalId': '',
       'orderBy': '',
-      "pageNumber": 1,
-      "pageSize": 10,
+      "pageNumber": this.pageIndex ,
+      "pageSize": this.pageSize,
       "sortKeyWord": ''
     }
+    console.log(condition,'condition');
     const httpOptions = {
       headers: new HttpHeaders({
         'Content-Type': 'application/json',
@@ -359,9 +351,14 @@ selectedFileOnChanged() {
     };
     console.log(httpOptions, '1111')
     this.http.post('http://192.168.5.185:8080/brainPlatform/rest/backend/queryDoctors', condition, httpOptions).subscribe((data: any) => {
-      const healthyList = data.body;
+      const healthyList = data.body.doctors;
       this.healthyDivision = healthyList;
       console.log(this.healthyDivision, '脑健师');
+      console.log(data, '脑健师111');
+      // this.pageIndex = data.body.pageNumber + 1;
+      console.log(this.pageIndex, 'this.pageIndex');
+      this.pageTotal =data.body.totalElements;
+      console.log(this.pageTotal,'pageTotal_');
     });
   }
 
