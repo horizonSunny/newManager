@@ -1,6 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+//导出Excel
+import * as FileSaver from "file-saver";
+import * as XLSX from "xlsx";
+import { CommonModule } from '@angular/common';
+import { FileUploadModule } from 'ng2-file-upload';
+import { FileUploader } from 'ng2-file-upload';
 @Component({
   selector: 'app-backusers',
   templateUrl: './backusers.component.html',
@@ -15,8 +21,8 @@ export class BackusersComponent implements OnInit {
   // 脑健师
   healthyDivision: any;
   selectedValue: any;
-  // 脑健师
-  hosNumber: any;
+  // // 脑健师
+  // hosNumber: any;
   // 城市
   options: any;
   nzOptions: any;
@@ -34,6 +40,9 @@ export class BackusersComponent implements OnInit {
   // hostileValue:any;
   // 身份证号
   idValue: any;
+
+  sex: any;
+  status: any;
   // 手机号
   phoneValue: any;
   // 邮箱号
@@ -44,9 +53,22 @@ export class BackusersComponent implements OnInit {
   workValue: any;
   // 新增医生
   newDoctor: any;
-  doctorEntity:any={};
+  doctorEntity: any = {};
   // 医生数据
-  doctorNumber:any;
+  doctorNumber: any;
+  // 选框用户
+  checkUser: any = [];
+  // 选框医生uid
+  checkDoctor: any;
+  // 导出
+  nameList: any;
+  // 医生选框
+  doctorList: any;
+  // 上传文件
+  filename:any;
+  display:boolean;
+
+  token:string = localStorage.getItem('token')
   constructor(
     private router: Router,
     private http: HttpClient,
@@ -55,77 +77,83 @@ export class BackusersComponent implements OnInit {
   sortName: string | null = null;
   sortValue: string | null = null;
   // 状态
-  listOfFilterAddress = [{ text: '正常', value: '正常' }, { text: '禁用', value: '禁用' }];
+  listOfFilterAddress = [{ text: '全部', value: '-1' }, { text: '账户已删除', value: '0' }, { text: '正常状态', value: '1' }, { text: '禁用状态', value: '2' }];
   // 性别
-  listOfFilterSex = [{ text: '2', value: '2' }, { text: '0', value: '0' }];
+  listOfFilterSex = [{ text: '女', value: '1' }, { text: '男', value: '0' }, { text: '全部', value: '-1' }];
   // 教育程度
-  listOfFilterEducation = [{ text: '乌鲁木齐阿波罗医院', value: '乌鲁木齐阿波罗医院' }, { text: '仁济医院', value: '仁济医院' }, { text: '浦东妇幼', value: '浦东妇幼' }];
+  // listOfFilterEducation = [{ text: '乌鲁木齐阿波罗医院', value: '乌鲁木齐阿波罗医院' }, { text: '仁济医院', value: '仁济医院' }, { text: '浦东妇幼', value: '浦东妇幼' }];
   listOfSearchAddress: string[] = [];
   listOfSearchSex: string[] = [];
   listOfSearchEducation: string[] = [];
   listOfSearchMedicine: string[] = [];
-  listOfData: Array<{ userName: string; age: number; address: string; sex: string; mobilenumber: string; registerEmail: string; hospitals: string; doctorNumber: string; status: string; createTime: string; fullname: string;[key: string]: string | number }> = [this.hosNumber];
+  listOfData: Array<{ filter: string }> = [this.healthyDivision];
   listOfDisplayData = [...this.listOfData];
-  reset(): void {
-    this.searchValue = '';
-    this.search();
-  }
+  // reset(): void {
+  //   this.searchValue = '';
+  //   this.search();
+  // }
   // 排序事件
-  sort(sort: { key: string; value: string }): void {
-    this.sortName = sort.key;
-    this.sortValue = sort.value;
-    this.search();
-  }
-  // 详情地址
-  filterAddressChange(value: string[]): void {
-    this.listOfSearchAddress = value;
-    console.log(this.listOfSearchAddress, 'sddfdf');
+  // sort(sort: { key: string; value: string }): void {
+  //   this.sortName = sort.key;
+  //   this.sortValue = sort.value;
+  //   this.search();
+  // }
+  // // 详情地址
+  // filterAddressChange(value: string): void {
+  //   console.log('filterAddressChange_',value);
+  //   // this.listOfSearchAddress = value;
+  //   // console.log(this.listOfSearchAddress, 'sddfdf');
 
-    this.search();
-  }
+  //   this.search();
+  // }
   // 性别
-  filterSexChange(value: string[]): void {
-    this.listOfSearchSex = value;
-    console.log(this.listOfSearchSex, '2222');
+  // filterSexChange(value: string[]): void {
+  //   this.listOfSearchSex = value;
+  //   console.log(this.listOfSearchSex, '2222');
 
-    this.search();
-  }
-  // 教育程度
-  filterEducationChange(value: string[]): void {
-    this.listOfSearchEducation = value;
-    console.log(this.listOfSearchEducation, '2222');
+  //   this.search();
+  // }
+  // // 教育程度
+  // filterEducationChange(value: string[]): void {
+  //   this.listOfSearchEducation = value;
+  //   console.log(this.listOfSearchEducation, '2222');
 
-    this.search();
+  //   this.search();
+  // }
+  // select筛选
+  selectFilter(selectName, selectValue: string) {
+    console.log('selectName_', selectName, '_selectValue_', selectValue);
+    this[selectName] = selectValue;
+    console.log('this.sex_', this.sex);
+    console.log('this.status_', this.status);
+    this.getdoctorList();
   }
 
-  search(): void {
-    const filterFunc = (item: { userName: string; age: number; address: string, sex: string; mobilenumber: string; registerEmail: string; hospitals: string; doctorNumber: string; status: string; createTime: string; fullname: string; }) => {
-      return (
-        (this.listOfSearchAddress.length
-          ? this.listOfSearchAddress.some(address => item.address.indexOf(address) !== -1)
-          : true) && item.userName.indexOf(this.searchValue) !== -1 &&
-        (this.listOfSearchSex.length
-          ? this.listOfSearchSex.some(sex => item.sex.indexOf(sex) !== -1)
-          : true) && item.userName.indexOf(this.searchValue) !== -1 &&
-        (this.listOfSearchEducation.length
-          ? this.listOfSearchEducation.some(hospitals => item.hospitals.indexOf(hospitals) !== -1)
-          : true) && item.userName.indexOf(this.searchValue) !== -1
-        // (this.listOfSearchMedicine.length
-        //   ? this.listOfSearchMedicine.some(medicine => item.medicine.indexOf(medicine) !== -1)
-        //   : true) && item.name.indexOf(this.searchValue) !== -1
-      );
-    };
-    const data = this.listOfData.filter((item: { userName: string; age: number; address: string, sex: string, mobilenumber: string, registerEmail: string; hospitals: string; doctorNumber: string; status: string; medicine: string; createTime: string; fullname: string; }) => filterFunc(item));
-    this.listOfDisplayData = data.sort((a, b) =>
-      this.sortValue === 'ascend'
-        ? a[this.sortName!] > b[this.sortName!]
-          ? 1
-          : -1
-        : b[this.sortName!] > a[this.sortName!]
-          ? 1
-          : -1
-    );
-  }
+  // search(): void {
+  //   const filterFunc = (item: { filter:string }) => {
+  // return (
+  //   (this.listOfSearchAddress.length
+  //     ? this.listOfSearchAddress.some(address => item.address.indexOf(address) !== -1)
+  //     : true) && item.userName.indexOf(this.searchValue) !== -1 &&
+  //   (this.listOfSearchSex.length
+  //     ? this.listOfSearchSex.some(sex => item.sex.indexOf(sex) !== -1)
+  //     : true) && item.userName.indexOf(this.searchValue) !== -1 &&
+  //   (this.listOfSearchEducation.length
+  //     ? this.listOfSearchEducation.some(hospitals => item.hospitals.indexOf(hospitals) !== -1)
+  //     : true) && item.userName.indexOf(this.searchValue) !== -1
+  // );
+  // };
+  // const data = this.listOfData.filter((item: { filter:string }) => filterFunc(item));
+  // this.listOfDisplayData = data.sort((a, b) =>
+  //   this.sortValue === 'ascend'
+  //     ? a[this.sortName!] > b[this.sortName!]
+  //       ? 1
+  //       : -1
+  //     : b[this.sortName!] > a[this.sortName!]
+  //       ? 1
+  //       : -1
+  // );
+  // }
 
   // 测评列表
   healthyUser() {
@@ -133,19 +161,89 @@ export class BackusersComponent implements OnInit {
     this.router.navigate(['/backusers']);
 
   }
+  // 接受选框的值
+  // doctorList = [];
+  // 选框--选中
+  mapOfCheckedId(valueCheck, info): void {
+    // console.log(valueCheck, '选框--选中',info);
+    this.checkDoctor = valueCheck;
+    this.doctorList = [];
+    this.healthyDivision.map(data => {
+      console.log(data.doctorEntity, '选框');
+      if (data.checked === true) {
+        console.log(data.checked, 'fuxuankuang');
+        this.doctorList.push(data.doctorEntity)
+      }
+    });
+    console.log("返回true", this.doctorList);
+  }
   // 下载模板
   downloadModal() {
     console.log('下载模板');
+    window.location.href = 'http://192.168.5.176:8081/脑健康管理师档案信息（导入模板）.xls';
   }
   // 导入
-  importModal() {
-    console.log('导入');
-  }
+  public uploader:FileUploader = new FileUploader({    
+    url: "http://192.168.5.185:8080/brainPlatform/rest/backend/importDoctors"+'?status=1',
+    method: "POST",    
+    itemAlias: "uploadedfile",
+    headers:[
+      {name:"token",value:this.token}
+    ]
+  });
+  
+selectedFileOnChanged() {
+  // 这里是文件选择完成后的操作处理
+  console.log('1111')
+  this.uploader.queue[0].onSuccess = (response, status, headers) => { 
+      console.log(this.uploader,'http地址');
+      console.log(response,'response');
+      console.log(status,'status');
+      console.log(status,'headers');
+      // 上传文件成功   
+      if (status === 200) {
+          alert('上传文件成功');
+          // 上传文件后获取服务器返回的数据 
+          // const tempRes = JSON.parse(response);
+      }else {            
+          // 上传文件后获取服务器返回的数据错误
+          alert('上传错误')        
+      }
+    };
+    this.uploader.queue[0].upload();
+}
+
   // 导出
   exportModal() {
-    console.log('导出');
-    this.isVisible = true;
-
+    console.log(this.doctorList, '导出');
+    if (this.doctorList == []) {
+      this.isVisible = true;
+    } else {
+      let nameList;
+      const params = {
+        doctorIds: [this.checkDoctor]
+      };
+      console.log(params, '导出--确定');
+      this.http.post('http://192.168.5.185:8080/brainPlatform/rest/backend/exportDoctors', params,
+        { headers: { token: localStorage.getItem('token') }, responseType: 'blob' }).subscribe((data: any) => {
+          console.log(data, '导出数据');
+          var blob = new Blob([data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+          var objectUrl = URL.createObjectURL(blob);
+          window.open(objectUrl);
+          // var objectUrl = URL.createObjectURL(blob);  
+          // var a = document.createElement('a');
+          // document.body.appendChild(a);
+          // a.setAttribute('style', 'display:none');
+          // a.setAttribute('href', objectUrl);
+          // a.setAttribute('download', fileName);
+          // a.click();
+          // URL.revokeObjectURL(objectUrl);
+        });
+    }
+  }
+  // 导出--确定
+  patientOk() {
+    this.isVisible = false;
   }
   // 新建
   showModal(): void {
@@ -206,11 +304,11 @@ export class BackusersComponent implements OnInit {
       this.newDoctor = data.body;
       // console.log(this.newDoctor,'医生数据');
       const doctoeUser = {
-        doctorEntity:this.newDoctor,
-        hospitals:this.newDoctor.hostileName
+        doctorEntity: this.newDoctor,
+        hospitals: this.newDoctor.hostileName
       }
       this.doctorNumber = doctoeUser;
-      console.log(doctoeUser,'医生数据');
+      console.log(doctoeUser, '医生数据');
       this.healthyDivision.unshift(this.doctorNumber);
     });
   }
@@ -221,11 +319,31 @@ export class BackusersComponent implements OnInit {
     this.newVisible = false;
   }
 
-
-  ngOnInit(): void {
+  // 重置密码
+  resetPass(uid){
+    console.log(uid, '重置密码');
+    const url ='http://192.168.5.185:8080/brainPlatform/rest/backend/resetPassword?uid='+uid;
+    const httpOptions = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        'token':  localStorage.getItem('token') 
+      })
+    };
+    console.log(httpOptions,'httpOptions');
+    this.http.post(url,{},httpOptions).subscribe((data: any) => {
+      console.log(data, '重置密码');
+    });
+  }
+  // 禁用
+  prohibit(uid){
+    console.log(uid, '禁用');
+    const url ='http://192.168.5.185:8080/brainPlatform/rest/backend/resetPassword?uid='+uid+'&';
+  }
+  // 获取医生用户列表
+  getdoctorList() {
     const condition = {
-      'doctorSex': '',
-      'doctorStatus': '',
+      'doctorSex': this.sex,
+      'doctorStatus': this.status,
       'fullname': '',
       'hospitalId': '',
       'orderBy': '',
@@ -245,5 +363,9 @@ export class BackusersComponent implements OnInit {
       this.healthyDivision = healthyList;
       console.log(this.healthyDivision, '脑健师');
     });
+  }
+
+  ngOnInit(): void {
+    this.getdoctorList();
   }
 }

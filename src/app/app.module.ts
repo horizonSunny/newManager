@@ -26,6 +26,8 @@ import { AdminusersComponent } from './adminusers/adminusers.component';
 import { CookieService, CookieModule } from 'ngx-cookie';
 import { ForgotopwdComponent } from './forgotopwd/forgotopwd.component';
 import { JwtModule } from '@auth0/angular-jwt';
+import { FileUploadModule } from 'ng2-file-upload';
+import { CommonModule }     from '@angular/common';
 
 registerLocaleData(zh);
 
@@ -58,6 +60,8 @@ export function tokenGetter() {
     NgZorroAntdModule,
     ReactiveFormsModule,
     BaceheaderModule,
+    CommonModule,
+    FileUploadModule,
     CookieModule.forRoot(),
     JwtModule.forRoot({
 			config: {
